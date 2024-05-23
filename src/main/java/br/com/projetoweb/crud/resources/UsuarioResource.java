@@ -1,23 +1,52 @@
 package br.com.projetoweb.crud.resources;
 
+import java.net.URI;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.projetoweb.crud.entidades.User;
+import br.com.projetoweb.crud.services.UserService;
 
 @RestController
 @RequestMapping(value = "/users")
 
 public class UsuarioResource {
 	
+	@Autowired
+	private UserService service;
+	
 	@GetMapping
-	public ResponseEntity<User> FindAll(){
+	public ResponseEntity<List<User>> findAll(){
 		
-		User usuario = new User(1L, "Ana", "ana@exemplo.com", "99999999", "123");
+		List<User> list= service.findAll();
+		return ResponseEntity.ok().body(list);
+		
+	}
+		
+	@GetMapping(value="/{id}")
+	public ResponseEntity<User> findById(@PathVariable	 Long id){
+		
+		User usuario = service.findById(id);
+		
 		return ResponseEntity.ok().body(usuario);
+	}
+	@PostMapping
+	public ResponseEntity<User> insert(@RequestBody User usuario){
 		
+		usuario = 	service.insert(usuario);
+		
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id").buildAndExpand(usuario.getId()).toUri();
+		
+		return ResponseEntity.created(uri).body(usuario);
 		
 	}
 }
